@@ -302,7 +302,7 @@ SLIDES.forEach(s => { if (s.builds == null) s.builds = (s.type === "pair" || s.t
 "use strict";
 const L = LESSON;
 const PREFIX = "nclause-thanet-v1";
-const BROKERS = ["wss://broker.hivemq.com:8884/mqtt","wss://broker.emqx.io:8084/mqtt"];
+const BROKERS = ["wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081/mqtt","wss://broker.hivemq.com:8884/mqtt"];
 const ACT = {mind:1, spot:1, build:1, fix:1};
 function fmt(t){
   return esc(t).replace(/\[\[(.+?)\]\]/g, '<mark>$1</mark>').replace(/\{\{(.+?)\}\}/g, '<span class="noun">$1</span>').replace(/~~(.+?)~~/g, '<span class="bad">$1</span>');
@@ -342,26 +342,28 @@ const ALL_CHUNKS = L.passage.flat();
 /* ---------- transport: MQTT (internet) + BroadcastChannel (same device) ---------- */
 function Transport(room, onMsg, onStatus){
   const base = PREFIX + "/" + room + "/";
-  let client = null, live = false, bc = null;
+  let bc = null; const clients = [];
   try{ bc = new BroadcastChannel(base); bc.onmessage = e => onMsg(e.data.t, e.data.m); }catch(e){}
-  function connect(i){
-    if (typeof mqtt === "undefined" || i >= BROKERS.length){ onStatus(false); return; }
-    let tried = false;
-    try{
-      client = mqtt.connect(BROKERS[i], {clientId:"nc_" + Math.random().toString(36).slice(2,10), reconnectPeriod:3000, connectTimeout:6000, clean:true});
-    }catch(e){ connect(i+1); return; }
-    const timer = setTimeout(() => { if(!live && !tried){ tried = true; try{client.end(true);}catch(e){} connect(i+1); } }, 7000);
-    client.on("connect", () => { clearTimeout(timer); live = true; onStatus(true); client.subscribe(base + "#"); });
-    client.on("close", () => { if(live){ live = false; onStatus(false); } });
-    client.on("message", (topic, payload) => {
-      try{ onMsg(topic.slice(base.length), JSON.parse(payload.toString())); }catch(e){}
+  const report = () => { const n = clients.filter(c => c.live).length; onStatus(n > 0, n, BROKERS.length); };
+  if (typeof mqtt !== "undefined"){
+    BROKERS.forEach(url => {
+      const rec = {live: false, c: null};
+      try{
+        rec.c = mqtt.connect(url, {clientId: "nc_" + Math.random().toString(36).slice(2, 10), reconnectPeriod: 4000, connectTimeout: 8000, clean: true});
+      }catch(e){ return; }
+      clients.push(rec);
+      rec.c.on("connect", () => { rec.live = true; rec.c.subscribe(base + "#"); report(); });
+      rec.c.on("close", () => { if (rec.live){ rec.live = false; report(); } });
+      rec.c.on("error", () => {});
+      rec.c.on("message", (topic, payload) => { try{ onMsg(topic.slice(base.length), JSON.parse(payload.toString())); }catch(e){} });
     });
   }
-  connect(0);
+  setTimeout(() => { if (!clients.some(c => c.live)) onStatus(false, 0, BROKERS.length); }, 10000);
   return {
     send(t, m, retain){
       if (bc) try{ bc.postMessage({t, m}); }catch(e){}
-      if (client && live) try{ client.publish(base + t, JSON.stringify(m), {retain:!!retain, qos:0}); }catch(e){}
+      const payload = JSON.stringify(m);
+      clients.forEach(rec => { if (rec.live) try{ rec.c.publish(base + t, payload, {retain: !!retain, qos: 0}); }catch(e){} });
     }
   };
 }
@@ -401,9 +403,10 @@ function teacher(){
       }
     }
     if (t === "hello") pushState();
-  }, ok => {
+  }, (ok, n, total) => {
     const p = $("#live"); p.classList.toggle("live", ok);
-    p.querySelector("span").textContent = ok ? "Live" : "Offline (same device only)";
+    p.querySelector("span").textContent = ok ? `Live · ${n}/${total} servers` : "Offline (same device only)";
+    if (ok) pushState();
   });
 
   function said(){ const ex = students().find(s => s.mind && !S.hidden.includes(s.sid)); return ex ? {said: ex.mind, who: ex.name} : {said: "AI is helpful", who: ""}; }
