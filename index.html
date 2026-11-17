@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Noun Clauses in the Age of AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Caveat:wght@700&family=Noto+Sans+Thai:wght@400&display=swap">
+<style>
+
+:root{
+  --paper:#F6F8FC; --grid:#DCE5F2; --ink:#1C2A50; --ink-2:#4A587C; --ink-3:#8590AD;
+  --marker:#FFE047; --marker-2:#FFF3A6;
+  --note-y:#FFEC8A; --note-p:#FFC2DA; --note-b:#B9DDFF; --note-m:#B5EFD2;
+  --go:#2F5BEA; --go-ink:#fff; --ok:#13A060; --no:#E8434F;
+  --card:#FFFFFF; --edge:#1C2A50;
+  --display:"Bricolage Grotesque","Noto Sans Thai",system-ui,sans-serif;
+  --hand:"Caveat","Noto Sans Thai",cursive;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--display);color:var(--ink);background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--go);outline-offset:3px}
+.hidden{display:none!important}
+mark{background:none;color:inherit;padding:0 .08em;
+  background-image:linear-gradient(100deg,var(--marker) 0%,var(--marker) 100%);
+  background-repeat:no-repeat;background-size:100% 78%;background-position:0 70%;border-radius:.15em}
+mark.swipe{animation:swipe .7s cubic-bezier(.3,.7,.2,1) both}
+@keyframes swipe{from{background-size:0% 78%}to{background-size:100% 78%}}
+@media (prefers-reduced-motion:reduce){mark.swipe{animation:none}}
+.chunky{border:2.5px solid var(--edge);border-radius:14px;background:var(--card);box-shadow:4px 4px 0 var(--edge)}
+.btn{border:2.5px solid var(--edge);border-radius:12px;background:var(--card);padding:.55em 1em;font-weight:600;box-shadow:3px 3px 0 var(--edge);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--edge)}
+.btn.go{background:var(--go);color:var(--go-ink)}
+.hand{font-family:var(--hand);font-weight:700}
+
+/* ---------- teacher ---------- */
+#teacher{height:100%;display:grid;grid-template-rows:1fr auto}
+.stage{position:relative;overflow:hidden;padding:5vh 6vw 3vh}
+.slide{height:100%;display:flex;flex-direction:column;
+  --k:clamp(24px,2.5vw,40px); --big:clamp(46px,5.4vw,100px); --big-l:clamp(40px,4.4vw,80px); --mid:clamp(32px,3.4vw,60px); --sm:clamp(26px,2.4vw,42px); --card:clamp(40px,4.4vw,80px)}
+.slide.center{justify-content:center}
+.kicker{font-family:var(--hand);font-size:var(--k);color:var(--ink-2);margin:0 0 .25em;font-weight:700}
+.bigtext{font-size:var(--big);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin:0;max-width:20ch}
+.bigtext.long{font-size:var(--big-l);max-width:24ch}
+.subtext{font-size:var(--sm);color:var(--ink-2);margin:.7em 0 0;max-width:34ch;line-height:1.35}
+.tagline{font-family:var(--hand);font-size:var(--sm);color:var(--go);margin:.5em 0 0;font-weight:700}
+.lines{display:grid;gap:.55em;font-size:var(--mid);font-weight:700;line-height:1.2}
+.lines .ln{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4em}
+.lines .tg{font-family:var(--hand);font-size:.6em;color:var(--ink-2)}
+.later{visibility:hidden}
+.noun{border-bottom:.12em solid var(--note-b);padding:0 .05em}
+.bad{background:#FFC2DA;border-radius:.15em;padding:0 .1em;text-decoration:line-through;text-decoration-color:var(--no);text-decoration-thickness:.08em}
+.wr{display:grid;gap:.6em;font-size:var(--big-l);font-weight:800;line-height:1.15;letter-spacing:-.015em}
+.wr .mk{font-family:var(--hand);font-size:.55em;display:block;font-weight:700;letter-spacing:0}
+.sv{font-size:var(--big);font-weight:800;display:flex;flex-wrap:wrap;gap:.35em;align-items:flex-start;line-height:1}
+.sv .w{display:inline-flex;flex-direction:column;align-items:center;gap:.25em}
+.sv .w small{font-family:var(--hand);font-size:.38em;color:var(--go);font-weight:700}
+.sv .box{border:.06em solid var(--edge);border-radius:.18em;padding:.05em .2em;background:var(--marker)}
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.2vw;margin-top:1.4em}
+.c3{padding:1.1em 1.2em 1.3em}
+.c3 .cb{font-size:var(--card);font-weight:800;letter-spacing:-.02em;margin:0 0 .25em;line-height:1}
+.c3 .cu{font-family:var(--hand);font-size:var(--sm);color:var(--ink-2);margin:0;font-weight:700}
+.c3.y{background:var(--note-y)}.c3.p{background:var(--note-p)}.c3.b{background:var(--note-b)}
+.h2{font-size:var(--mid);font-weight:800;line-height:1.05;letter-spacing:-.015em;margin:0}
+.ans{font-family:var(--hand);font-size:var(--mid);color:var(--go);font-weight:700;margin:.4em 0 0}
+.bul{list-style:none;padding:0;margin:.4em 0 0;display:grid;gap:.55em;font-size:var(--mid);font-weight:700;line-height:1.2}
+.bul li{display:flex;gap:.5em}
+.bul li::before{content:"";flex:none;width:.5em;height:.5em;margin-top:.32em;border:.09em solid var(--edge);border-radius:.12em;background:var(--marker)}
+.bar{display:flex;align-items:center;gap:14px;padding:10px 4vw 14px;border-top:2.5px solid var(--edge);background:var(--card)}
+.secs{display:flex;gap:6px;flex:1;flex-wrap:wrap;align-items:center}
+.sec{border:2px solid var(--edge);border-radius:8px;background:var(--card);font-size:13px;font-weight:600;padding:4px 9px}
+.sec.on{background:var(--ink);color:#fff}
+.sec.act{background:var(--note-y)}
+.sec.on.act{background:var(--ink)}
+.pos{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;margin-left:6px}
+.nexthint{font-family:var(--hand);font-size:20px;color:var(--go);white-space:nowrap}
+.pill{font-size:13px;font-weight:600;border:2px solid var(--edge);border-radius:999px;padding:4px 10px;background:var(--card);white-space:nowrap}
+.pill i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ink-3);margin-right:6px;vertical-align:1px}
+.pill.live i{background:var(--ok)}
+.tools{display:flex;gap:8px}
+.tools .btn{font-size:14px;padding:.4em .8em}
+
+.mind{display:grid;grid-template-columns:minmax(220px,24vw) minmax(0,1fr);gap:3vw;height:100%;min-height:0}
+.joinbox{padding:18px;display:flex;flex-direction:column;gap:12px;align-self:start}
+.qr{background:#fff;border-radius:8px;display:grid;place-items:center;aspect-ratio:1}
+.qr svg{width:100%;height:auto;display:block}
+.code{font-size:15px;color:var(--ink-2);text-align:center}
+.code b{font-size:30px;color:var(--ink);letter-spacing:.12em;display:block}
+.wall{position:relative;overflow:auto;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:16px;padding:6px 6px 20px}
+.note{width:clamp(200px,17vw,290px);padding:22px 16px 16px;font-size:clamp(17px,1.45vw,24px);line-height:1.3;position:relative;box-shadow:3px 4px 0 rgba(28,42,80,.18);animation:drop .35s cubic-bezier(.2,1.4,.4,1) both;transform:rotate(var(--r,0deg))}
+.note::before{content:"";position:absolute;top:-9px;left:50%;width:64px;height:18px;margin-left:-32px;background:rgba(255,255,255,.65);border:1px solid rgba(28,42,80,.12);transform:rotate(-3deg)}
+.note .who{display:block;font-family:var(--hand);font-size:19px;color:var(--ink-2);margin-top:8px}
+.note button{position:absolute;top:4px;right:6px;border:0;background:none;font-size:16px;color:var(--ink-3);opacity:0}
+.note:hover button{opacity:1}
+@keyframes drop{from{opacity:0;transform:translateY(-14px) rotate(var(--r,0deg)) scale(.96)}to{opacity:1;transform:rotate(var(--r,0deg))}}
+@media (prefers-reduced-motion:reduce){.note{animation:none}}
+.empty{font-family:var(--hand);font-size:30px;color:var(--ink-3);padding:30px}
+.mindq{font-size:clamp(30px,3.4vw,58px);font-weight:800;line-height:1.08;letter-spacing:-.015em;margin:0 0 .5em}
+.mindq span{color:var(--ink-2);font-weight:600;display:block}
+
+.spot{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,22vw);gap:3vw;height:100%;min-height:0}
+.paper{padding:26px 30px;overflow:auto;min-height:0}
+.paper h3{margin:0 0 12px;font-size:clamp(24px,2.2vw,36px)}
+.paper p{font-size:clamp(19px,1.7vw,29px);line-height:1.6;margin:0 0 .7em;max-width:62ch}
+.paper .cnt{font-family:var(--hand);font-size:.75em;color:var(--go);margin-left:.15em}
+.side{display:flex;flex-direction:column;gap:14px}
+.stat{padding:16px 18px}
+.stat .n{font-size:clamp(40px,4.4vw,74px);font-weight:800;line-height:1;letter-spacing:-.02em}
+.stat .l{font-size:15px;color:var(--ink-2);margin-top:4px}
+.track{height:14px;border:2px solid var(--edge);border-radius:999px;overflow:hidden;background:var(--card);margin-top:10px}
+.track span{display:block;height:100%;background:var(--marker);transition:width .4s}
+.board{display:grid;gap:14px;margin-top:1.2em;max-width:1100px}
+.team{display:grid;grid-template-columns:minmax(300px,24vw) minmax(0,1fr) 90px;white-space:nowrap;gap:18px;align-items:center;font-size:clamp(20px,2vw,32px);font-weight:700}
+.team .tbar{height:clamp(34px,4.2vh,52px);border:2.5px solid var(--edge);border-radius:10px;background:var(--card);overflow:hidden}
+.team .tbar span{display:block;height:100%;transition:width .5s cubic-bezier(.2,1,.3,1)}
+.team .pts{text-align:right;font-variant-numeric:tabular-nums}
+.team small{display:block;font-size:14px;font-weight:500;color:var(--ink-2)}
+.fixgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,24vw);gap:3vw;margin-top:1em}
+.fixrow{padding:16px 20px;margin-bottom:14px;display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:16px;align-items:center}
+.fixrow .w{font-size:clamp(18px,1.7vw,28px);line-height:1.35}
+.fixrow .r{font-size:clamp(17px,1.5vw,25px);color:var(--ok);font-weight:600;margin-top:6px}
+.fixrow .pc{font-size:clamp(26px,2.4vw,40px);font-weight:800;text-align:right}
+.bigpc{font-size:clamp(70px,9vw,150px);font-weight:800;line-height:.9;letter-spacing:-.04em}
+.strike{text-decoration:line-through;text-decoration-color:var(--no);text-decoration-thickness:3px}
+
+/* phone mirror of the current slide */
+.mirror .slide{height:auto;--k:20px;--big:30px;--big-l:25px;--mid:23px;--sm:18px;--card:24px}
+.mirror .cards3{grid-template-columns:1fr;gap:10px}
+.mirror .c3{padding:12px 14px;box-shadow:3px 3px 0 var(--edge)}
+.mirror .bigtext{max-width:none}
+/* ---------- student ---------- */
+#student{min-height:100%;display:flex;flex-direction:column;max-width:560px;margin:0 auto;padding:16px 16px 28px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.me{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.me i{width:14px;height:14px;border-radius:4px;border:2px solid var(--edge);display:inline-block}
+.panel{padding:20px 18px}
+.panel h2{font-size:26px;line-height:1.1;margin:0 0 8px;font-weight:800;letter-spacing:-.01em}
+.panel:not(.mirror) p{margin:0 0 14px;color:var(--ink-2);font-size:16px;line-height:1.45}
+.th{font-family:"Noto Sans Thai",var(--display);font-size:14px;color:var(--ink-3)}
+.field{width:100%;font:inherit;font-size:20px;padding:12px 14px;border:2.5px solid var(--edge);border-radius:12px;background:#fff;color:var(--ink)}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 18px}
+.tpick{border:2.5px solid var(--edge);border-radius:12px;background:#fff;padding:14px 10px;font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+.tpick i{width:16px;height:16px;border-radius:5px;border:2px solid var(--edge)}
+.tpick[aria-pressed=true]{background:var(--note-y);box-shadow:3px 3px 0 var(--edge)}
+.full{width:100%;font-size:20px;padding:14px}
+.err{color:var(--no);font-size:14px;margin:8px 0 0;min-height:1em}
+.combo{display:flex;align-items:center;border:2.5px solid var(--edge);border-radius:12px;background:#fff;overflow:hidden}
+.combo:focus-within{outline:3px solid var(--go);outline-offset:2px}
+.combo .pre{flex:none;font-size:20px;font-weight:700;padding:12px 4px 12px 14px;background:var(--marker-2);align-self:stretch;display:flex;align-items:center;border-right:2px dashed var(--grid)}
+.combo input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:20px;padding:12px 12px;background:none;color:var(--ink)}
+.preview{font-family:var(--hand);font-size:24px;color:var(--ink);margin:10px 0 0!important}
+.starter{font-size:24px;font-weight:700;margin:6px 0 10px}
+.sent{margin-top:14px;font-family:var(--hand);font-size:24px;color:var(--ok)}
+.wait{text-align:center;padding:40px 18px}
+.wait .eyes{font-size:56px;line-height:1;margin-bottom:12px}
+.wait h2{font-size:28px}
+.ptext{font-size:19px;line-height:1.75}
+.ptext p{margin:0 0 .9em}
+.chunk{display:inline;cursor:pointer;padding:2px 1px;border-radius:5px;border-bottom:2px dashed #B8C6DE;-webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-tap-highlight-color:transparent}
+.chunk:focus-visible{outline:3px solid var(--go)}
+.chunk[aria-pressed=true]{background:var(--marker)}
+.chunk.right{background:var(--marker);outline:2px solid var(--ok)}
+.chunk.wrong{background:#FFD6DA;outline:2px solid var(--no)}
+.chunk.missed{outline:2px dashed var(--ok)}
+.counter{position:sticky;bottom:10px;margin-top:10px;padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.panel .q{font-size:22px;line-height:1.35;font-weight:600;margin:4px 0 16px;color:var(--ink)}
+.blank{display:inline-block;min-width:3.4em;border-bottom:3px solid var(--ink);text-align:center;color:var(--go)}
+.opts{display:grid;gap:10px}
+.opt{border:2.5px solid var(--edge);border-radius:12px;background:#fff;padding:14px;font-size:18px;text-align:left;font-weight:600}
+.opt.right{background:var(--note-m)}
+.opt.wrong{background:#FFD6DA}
+.prog{display:flex;gap:6px;margin-bottom:14px}
+.prog span{flex:1;height:8px;border-radius:4px;border:2px solid var(--edge);background:#fff}
+.prog span.done{background:var(--ink)}
+.robot{display:flex;gap:10px;align-items:flex-start;background:var(--note-b);border:2.5px solid var(--edge);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:19px;line-height:1.35}
+.robot svg{flex:none}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.score div{border:2.5px solid var(--edge);border-radius:12px;padding:10px;text-align:center;background:#fff;font-size:13px;color:var(--ink-2)}
+.score b{display:block;font-size:26px;color:var(--ink)}
+.toast{position:sticky;bottom:12px;margin-top:14px;text-align:center;font-weight:700;padding:10px;border-radius:12px;border:2.5px solid var(--edge)}
+#reveal{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:24px;transition:background-color .09s,opacity .6s ease}
+#reveal.fade{opacity:0;pointer-events:none}
+#reveal canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#reveal .rk{font-family:var(--hand);font-size:34px;font-weight:700;margin:0;position:relative}
+#reveal .ri{font-size:96px;line-height:1.1;margin:10px 0 4px;position:relative}
+#reveal .rn{font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1;margin:0;position:relative}
+#reveal .rs{font-size:18px;margin:14px 0 26px;opacity:.9;position:relative}
+#reveal .btn{position:relative;font-size:20px;padding:12px 28px;color:var(--ink)}
+#reveal.rolling .rn,#reveal.rolling .ri{animation:jit .09s steps(2) infinite}
+@keyframes jit{50%{transform:translateY(-3px)}}
+#reveal.landed .rn,#reveal.landed .ri{animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:scale(.6)}to{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){#reveal.rolling .rn,#reveal.rolling .ri,#reveal.landed .rn,#reveal.landed .ri{animation:none}}
+.status{font-size:12px;color:var(--ink-3);text-align:center;margin-top:auto;padding-top:18px}
+</style>
+</head>
+<body>
+
+<div id="teacher" class="hidden">
+  <main class="stage"><div id="slide" class="slide" aria-live="polite"></div></main>
+  <nav class="bar" aria-label="Lesson controls">
+    <button class="btn" id="prev" aria-label="Previous">◀</button>
+    <div class="secs" id="secs"></div>
+    <span class="nexthint" id="nexthint"></span>
+    <span class="pill" id="live"><i></i><span>Connecting</span></span>
+    <span class="pill" id="count">0 joined</span>
+    <div class="tools">
+      <button class="btn" id="demo" title="Add sample answers for practice">Demo</button>
+      <button class="btn" id="csv">Results</button>
+      <button class="btn" id="reset" title="Start a new class with a new room code">New class</button>
+    </div>
+    <button class="btn go" id="next" aria-label="Next">Next ▶</button>
+  </nav>
+</div>
+
+<div id="student" class="hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.16.1/dist/mqtt.min.js"></script>
+<script>const LESSON = {
+  title: "Noun Clauses in the Age of AI",
+  mindPrompt: "What do you think about AI in school?",
+  mindStarter: "I think that",
+  passageTitle: "Can AI Help Us Learn?",
+  // Each paragraph is a list of chunks: [text, clauseId]; clauseId 0 = not a noun clause.
+  passage: [
+    [["Today, many students use AI apps", 0], ["to do their homework.", 0], ["Some teachers worry", 0], ["that students will stop thinking for themselves.", 1], ["Other people believe", 0], ["that AI can be a great study partner.", 2]],
+    [["What AI does well", 3], ["is explaining hard ideas", 0], ["in simple words.", 0], ["For example, you can ask it", 0], ["how a volcano works.", 4], ["However, AI is not always right.", 0], ["The problem is", 0], ["that it sometimes gives wrong answers.", 5], ["So students should always check", 0], ["whether the information is true.", 6]],
+    [["Experts say", 0], ["that AI is a tool, not a teacher.", 7], ["Whether AI helps us or hurts us", 8], ["depends on", 0], ["how we use it.", 9]]
+  ],
+  clauses: {
+    1: { starter: "that", job: "object" },
+    2: { starter: "that", job: "object" },
+    3: { starter: "what", job: "subject" },
+    4: { starter: "how", job: "object" },
+    5: { starter: "that", job: "complement" },
+    6: { starter: "whether", job: "object" },
+    7: { starter: "that", job: "object" },
+    8: { starter: "whether", job: "subject" },
+    9: { starter: "how", job: "object" }
+  },
+  build: [
+    { before: "I don't know", after: "the homework is due.", options: ["when", "what", "that"], answer: 0 },
+    { before: "Can you tell me", after: "?", options: ["where does the library open", "where the library opens", "where opens the library"], answer: 1 },
+    { before: "", after: "she said surprised everyone.", options: ["That", "What", "If"], answer: 1 },
+    { before: "The truth is", after: "AI cannot think like humans.", options: ["what", "whether", "that"], answer: 2 },
+    { before: "I wonder", after: "AI will replace teachers.", options: ["whether", "what", "that"], answer: 0 },
+    { before: "The article says that", after: "", options: ["AI should be banned in every school", "AI can help us learn if we use it carefully", "AI always gives the right answers"], answer: 1, mainIdea: true }
+  ],
+  fix: [
+    { wrong: "I wonder what is your name.", options: ["I wonder what your name is.", "I wonder what is you name.", "I wonder that what your name is."], answer: 0 },
+    { wrong: "Do you know when does the class start?", options: ["Do you know when does class starts?", "Do you know when start the class?", "Do you know when the class starts?"], answer: 2 },
+    { wrong: "She asked that if I liked AI.", options: ["She asked that I liked AI.", "She asked if I liked AI.", "She asked if did I like AI."], answer: 1 }
+  ],
+  teams: [
+    { id: "robot", name: "Team Robot", color: "#E8434F", icon: "🥊" },
+    { id: "pixel", name: "Team SomTam", color: "#2F5BEA", icon: "🍐" },
+    { id: "byte", name: "Team Bangkok", color: "#13A060", icon: "😎" },
+    { id: "chip", name: "Team Esan", color: "#8A4FE8", icon: "🧟" }
+  ],
+  demoAnswers: ["AI is helpful for homework", "AI makes students lazy", "teachers are still important", "AI can explain things fast", "we should use AI carefully", "AI is fun to talk to", "AI sometimes gives wrong answers", "students need to think for themselves"]
+};
+
+// Markup in slide text: [[x]] = highlighter (noun clause), {{x}} = noun underline, ~~x~~ = wrong part (pink)
+const SLIDES = [
+  {sec:"Warm-up", type:"title", kicker:"English · M.3 · Reading", text:"Noun clauses in the age of AI", sub:"Today we find the sentences hiding inside sentences."},
+  {sec:"Warm-up", type:"list", kicker:"By the end of class, you can…", items:["[[name]] the words that start a noun clause", "[[explain]] what job a noun clause does", "[[find]] noun clauses in a reading and use them to give its main idea"]},
+  {sec:"Warm-up", type:"mind", builds:1, hint:["Wait for answers", "Highlight the clauses"]},
+  {sec:"Learn", type:"mine", kicker:"Look at what you wrote", builds:1, hint:["", "Highlight it"]},
+  {sec:"Learn", type:"pair", kicker:"Compare", lines:[{t:"I think {{this}}.", tag:"a noun"}, {t:"I think [[that AI is helpful]].", tag:"a noun clause"}], hint:["Show line 2"]},
+  {sec:"Learn", type:"big", kicker:"So…", text:"A noun clause is a sentence that works like a noun."},
+  {sec:"Learn", type:"sv", kicker:"It has its own subject and verb", s:"AI", v:"is", rest:"helpful", lead:"that"},
+  {sec:"Learn", type:"pair", kicker:"Turn a noun into a noun clause", lines:[{t:"I know {{the answer}}.", tag:"a noun"}, {t:"I know [[what the answer is]].", tag:"a noun clause"}], hint:["Show the change"]},
+  {sec:"Starters", type:"cards", kicker:"How do they start?", title:"Three kinds of starters", cards:[{big:"that", use:"ideas and facts", c:"y"}, {big:"wh-", use:"what · where · when · how · why · who", c:"p"}, {big:"if / whether", use:"yes or no ideas", c:"b"}]},
+  {sec:"Starters", type:"big", kicker:"Starter 1 · that", text:"Experts say [[that AI is a tool]].", tag:"that + idea"},
+  {sec:"Starters", type:"big", kicker:"Starter 2 · wh- words", text:"You can ask it [[how a volcano works]].", tag:"how + information"},
+  {sec:"Starters", type:"big", kicker:"Starter 3 · if / whether", text:"Check [[whether the information is true]].", tag:"whether + yes or no"},
+  {sec:"Starters", type:"check", kicker:"Quick check", q:"Which word starts the noun clause?", text:"I wonder [[if AI can feel happy]].", answer:"if", hint:["Show the answer"]},
+  {sec:"Jobs", type:"cards", kicker:"Where do they go?", title:"Three jobs in a sentence", cards:[{big:"Subject", use:"before the main verb", c:"y"}, {big:"Object", use:"after the main verb", c:"p"}, {big:"Complement", use:"after be (is / was)", c:"b"}]},
+  {sec:"Jobs", type:"big", kicker:"Job 1 · subject", text:"[[What AI does well]] is explaining ideas.", tag:"before the verb \"is\""},
+  {sec:"Jobs", type:"big", kicker:"Job 2 · object", text:"Some teachers worry [[that students will stop thinking]].", tag:"after the verb \"worry\""},
+  {sec:"Jobs", type:"big", kicker:"Job 3 · complement", text:"The problem is [[that it gives wrong answers]].", tag:"after \"is\""},
+  {sec:"Jobs", type:"check", kicker:"Quick check", q:"Subject, object, or complement?", text:"[[Whether AI helps us]] depends on how we use it.", answer:"subject", hint:["Show the answer"]},
+  {sec:"Rule", type:"big", kicker:"The one rule to remember", text:"Inside a noun clause, don't flip the subject and verb."},
+  {sec:"Rule", type:"wrongright", kicker:"Spot the mistake", wrong:"I know where ~~does he live~~.", right:"I know where [[he lives]].", hint:["Fix it"]},
+  {sec:"Rule", type:"wrongright", kicker:"One more", wrong:"Tell me what ~~is your name~~.", right:"Tell me what [[your name is]].", hint:["Fix it"]},
+  {sec:"Rule", type:"big", kicker:"Remember", text:"Subject first, then verb. No do, does, or did inside."},
+  {sec:"Read", type:"spot", builds:1, hint:["Show answers"]},
+  {sec:"Read", type:"check", kicker:"Main idea", q:"What is the article saying?", text:"The article says [[that AI can help us learn if we use it carefully]].", answer:"", hint:["Show the main idea"], hideText:true},
+  {sec:"Play", type:"build"},
+  {sec:"Play", type:"fix", builds:1, hint:["Show answers"]},
+  {sec:"Wrap-up", type:"list", kicker:"Today we learned", builds:3, items:["A noun clause works like a noun.", "It starts with [[that]], a [[wh- word]], or [[if / whether]].", "It can be the subject, the object, or the complement.", "Subject first, then verb. No question order inside."], hint:["Next point", "Next point", "Next point"]},
+  {sec:"Wrap-up", type:"title", kicker:"Thank you", text:"AI can help us learn if we use it carefully.", sub:"Now you can find the sentences inside sentences."}
+];
+SLIDES.forEach(s => { if (s.builds == null) s.builds = (s.type === "pair" || s.type === "wrongright" || s.type === "check") ? 1 : 0; });
+</script>
+<script>
+(function(){
+"use strict";
+const L = LESSON;
+const PREFIX = "nclause-thanet-v1";
+const BROKERS = ["wss://broker.hivemq.com:8884/mqtt","wss://broker.emqx.io:8084/mqtt"];
+const ACT = {mind:1, spot:1, build:1, fix:1};
+function fmt(t){
+  return esc(t).replace(/\[\[(.+?)\]\]/g, '<mark>$1</mark>').replace(/\{\{(.+?)\}\}/g, '<span class="noun">$1</span>').replace(/~~(.+?)~~/g, '<span class="bad">$1</span>');
+}
+function plainLen(t){ return t.replace(/\[\[|\]\]|\{\{|\}\}|~~/g, "").length; }
+function slideHTML(sl, b, ctx){
+  const v = (i) => i <= b ? "" : " later";
+  switch (sl.type){
+    case "title": return `<p class="kicker">${esc(sl.kicker)}</p><h1 class="bigtext${plainLen(sl.text) > 40 ? " long" : ""}">${fmt(sl.text)}</h1>${sl.sub ? `<p class="subtext">${fmt(sl.sub)}</p>` : ""}`;
+    case "big": return `<p class="kicker">${esc(sl.kicker)}</p><p class="bigtext${plainLen(sl.text) > 38 ? " long" : ""}">${fmt(sl.text)}</p>${sl.tag ? `<p class="tagline">← ${esc(sl.tag)}</p>` : ""}`;
+    case "list": return `<p class="kicker">${esc(sl.kicker)}</p><ul class="bul">${sl.items.map((it, i) => `<li class="${sl.builds ? v(i) : ""}"><span>${fmt(it)}</span></li>`).join("")}</ul>`;
+    case "pair": return `<p class="kicker">${esc(sl.kicker)}</p><div class="lines">${sl.lines.map((l, i) => `<div class="ln${v(i)}"><span>${fmt(l.t)}</span><span class="tg">← ${esc(l.tag)}</span></div>`).join("")}</div>`;
+    case "sv": return `<p class="kicker">${esc(sl.kicker)}</p><div class="sv"><span>I think</span><span>${esc(sl.lead)}</span><span class="w"><span class="box">${esc(sl.s)}</span><small>subject</small></span><span class="w"><span class="box">${esc(sl.v)}</span><small>verb</small></span><span>${esc(sl.rest)}</span></div>`;
+    case "cards": return `<p class="kicker">${esc(sl.kicker)}</p><h2 class="h2">${esc(sl.title)}</h2><div class="cards3">${sl.cards.map(c => `<div class="chunky c3 ${c.c}"><p class="cb">${esc(c.big)}</p><p class="cu">${esc(c.use)}</p></div>`).join("")}</div>`;
+    case "check": {
+      const txt = sl.hideText && b < 1 ? "The article says ___." : (b >= 1 ? fmt(sl.text) : esc(sl.text.replace(/\[\[|\]\]/g, "")));
+      return `<p class="kicker">${esc(sl.kicker)}</p><h2 class="h2" style="color:var(--ink-2);font-weight:600;margin-bottom:.5em">${esc(sl.q)}</h2><p class="bigtext long">${txt}</p>${sl.answer ? `<p class="ans${b >= 1 ? "" : " later"}">→ ${esc(sl.answer)}</p>` : ""}`;
+    }
+    case "wrongright": return `<p class="kicker">${esc(sl.kicker)}</p><div class="wr"><div><span class="mk" style="color:var(--no)">✗ question order</span>${fmt(sl.wrong)}</div><div class="${v(1).trim()}"><span class="mk" style="color:var(--ok)">✓ statement order</span>${fmt(sl.right)}</div></div>`;
+    case "mine": {
+      const said = (ctx && ctx.said) || "AI is helpful";
+      return `<p class="kicker">${esc(sl.kicker)}</p><p class="bigtext long">I think ${b >= 1 ? `<mark class="swipe">that ${esc(said)}</mark>` : `that ${esc(said)}`}.</p>${b >= 1 ? `<p class="tagline">← this whole part is a noun clause</p>` : `<p class="tagline">${ctx && ctx.who ? "— " + esc(ctx.who) : ""}</p>`}`;
+    }
+  }
+  return "";
+}
+
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const CLAUSE_IDS = Object.keys(L.clauses).map(Number);
+const ALL_CHUNKS = L.passage.flat();
+
+/* ---------- transport: MQTT (internet) + BroadcastChannel (same device) ---------- */
+function Transport(room, onMsg, onStatus){
+  const base = PREFIX + "/" + room + "/";
+  let client = null, live = false, bc = null;
+  try{ bc = new BroadcastChannel(base); bc.onmessage = e => onMsg(e.data.t, e.data.m); }catch(e){}
+  function connect(i){
+    if (typeof mqtt === "undefined" || i >= BROKERS.length){ onStatus(false); return; }
+    let tried = false;
+    try{
+      client = mqtt.connect(BROKERS[i], {clientId:"nc_" + Math.random().toString(36).slice(2,10), reconnectPeriod:3000, connectTimeout:6000, clean:true});
+    }catch(e){ connect(i+1); return; }
+    const timer = setTimeout(() => { if(!live && !tried){ tried = true; try{client.end(true);}catch(e){} connect(i+1); } }, 7000);
+    client.on("connect", () => { clearTimeout(timer); live = true; onStatus(true); client.subscribe(base + "#"); });
+    client.on("close", () => { if(live){ live = false; onStatus(false); } });
+    client.on("message", (topic, payload) => {
+      try{ onMsg(topic.slice(base.length), JSON.parse(payload.toString())); }catch(e){}
+    });
+  }
+  connect(0);
+  return {
+    send(t, m, retain){
+      if (bc) try{ bc.postMessage({t, m}); }catch(e){}
+      if (client && live) try{ client.publish(base + t, JSON.stringify(m), {retain:!!retain, qos:0}); }catch(e){}
+    }
+  };
+}
+
+/* ---------- shared helpers ---------- */
+function spotScore(picks){
+  const set = new Set(picks || []);
+  let hit = 0, miss = 0;
+  ALL_CHUNKS.forEach((c, i) => { if (set.has(i)) { if (c[1]) hit++; else miss++; } });
+  return {hit, miss, total: CLAUSE_IDS.length};
+}
+function teamOf(id){ return L.teams.find(t => t.id === id) || L.teams[0]; }
+const ROBOT = '<svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="5" y="9" width="24" height="19" rx="5" fill="#fff" stroke="#1C2A50" stroke-width="2.5"/><circle cx="13" cy="18" r="2.6" fill="#1C2A50"/><circle cx="21" cy="18" r="2.6" fill="#1C2A50"/><path d="M13 24h8" stroke="#1C2A50" stroke-width="2.5" stroke-linecap="round"/><path d="M17 9V4" stroke="#1C2A50" stroke-width="2.5"/><circle cx="17" cy="4" r="2" fill="#E8434F"/></svg>';
+
+/* =====================================================================
+   TEACHER
+   ===================================================================== */
+function teacher(){
+  $("#teacher").classList.remove("hidden");
+  let room = store.get("nc_room", null);
+  if (!room){ room = Array.from({length:4}, () => "ABCDEFGHJKMNPQRSTUVWXYZ"[Math.floor(Math.random()*23)]).join(""); store.set("nc_room", room); }
+  const S = store.get("nc_t2_" + room, {i:0, b:0, hidden:[], students:{}, assign:{}});
+  if (!S.assign) S.assign = {};
+  let fresh = new Set();
+  const save = () => store.set("nc_t2_" + room, S);
+  const joinURL = location.href.split("#")[0] + "#r=" + room;
+
+  const net = Transport(room, (t, m) => {
+    if (t === "s" && m && m.sid){
+      const old = S.students[m.sid];
+      if (!old || JSON.stringify(old) !== JSON.stringify(m)){
+        if (m.mind && (!old || old.mind !== m.mind)) fresh.add(m.sid);
+        S.students[m.sid] = m;
+        const isNew = !S.assign[m.sid];
+        assignTeam(m.sid); save(); render(false);
+        if (isNew) pushState();
+      }
+    }
+    if (t === "hello") pushState();
+  }, ok => {
+    const p = $("#live"); p.classList.toggle("live", ok);
+    p.querySelector("span").textContent = ok ? "Live" : "Offline (same device only)";
+  });
+
+  function said(){ const ex = students().find(s => s.mind && !S.hidden.includes(s.sid)); return ex ? {said: ex.mind, who: ex.name} : {said: "AI is helpful", who: ""}; }
+  function pushState(){ const c = said(); net.send("state", {i: S.i, b: S.b, key: SLIDES[S.i].type, said: c.said, teams: S.assign, at: Date.now()}, true); }
+  function students(){ return Object.values(S.students); }
+  function teamSizes(){ const c = {}; L.teams.forEach(t => c[t.id] = 0); Object.values(S.assign).forEach(t => { if (t in c) c[t]++; }); return c; }
+  function assignTeam(sid){
+    if (S.assign[sid]) return S.assign[sid];
+    const c = teamSizes(); const min = Math.min(...Object.values(c));
+    const pick = L.teams.filter(t => c[t.id] === min); const t = pick[Math.floor(Math.random() * pick.length)].id;
+    S.assign[sid] = t; return t;
+  }
+  function tm(s){ return S.assign[s.sid] || assignTeam(s.sid); }
+
+  function go(i, b){
+    S.i = Math.max(0, Math.min(SLIDES.length - 1, i));
+    S.b = b == null ? 0 : b; save(); pushState(); render(true);
+  }
+  function next(){ const sl = SLIDES[S.i]; if (S.b < sl.builds){ S.b++; save(); pushState(); render("build"); } else if (S.i < SLIDES.length - 1) go(S.i + 1, 0); }
+  function prev(){ if (S.b > 0){ S.b--; save(); pushState(); render(false); } else if (S.i > 0){ go(S.i - 1, SLIDES[S.i - 1].builds); } }
+  $("#prev").onclick = prev;
+  $("#next").onclick = next;
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT") return;
+    if (["ArrowRight","PageDown"," ","Enter"].includes(e.key)) { e.preventDefault(); next(); }
+    if (["ArrowLeft","PageUp","Backspace"].includes(e.key)) { e.preventDefault(); prev(); }
+  });
+  $("#demo").onclick = addDemo;
+  $("#csv").onclick = downloadCSV;
+  let armed = 0;
+  $("#reset").onclick = () => {
+    const btn = $("#reset");
+    if (Date.now() - armed < 4000){ try{ localStorage.removeItem("nc_t2_" + room); localStorage.removeItem("nc_room"); }catch(e){} location.reload(); return; }
+    armed = Date.now(); btn.textContent = "Tap again to reset";
+    setTimeout(() => { btn.textContent = "New class"; }, 4000);
+  };
+
+  function addDemo(){
+    const names = ["Mint","Beam","Fah","Ton","Ice","Praew","Nut","Bank"];
+    names.forEach((n, i) => {
+      const sid = "demo" + i, picks = [];
+      ALL_CHUNKS.forEach((c, k) => { if (c[1] && Math.random() < .75) picks.push(k); if (!c[1] && Math.random() < .06) picks.push(k); });
+      const build = {}, fix = {};
+      L.build.forEach((x, k) => { build[k] = Math.random() < .72; });
+      L.fix.forEach((x, k) => { fix[k] = Math.random() < .78; });
+      assignTeam(sid); S.students[sid] = {sid, demo:true, name:n, mind:L.demoAnswers[i % L.demoAnswers.length], spot:picks, build, fix};
+      fresh.add(sid);
+    });
+    save(); render(false); pushState();
+  }
+
+  function downloadCSV(){
+    const rows = [["name","team","mind_reader","spot_found","spot_wrong","builder_correct","fix_correct","fix_total"]];
+    students().forEach(s => {
+      const sc = spotScore(s.spot);
+      const b = Object.values(s.build || {}).filter(Boolean).length;
+      const f = Object.values(s.fix || {}).filter(Boolean).length;
+      rows.push([s.name, teamOf(tm(s)).name, (L.mindStarter + " " + (s.mind || "")).trim(), sc.hit + "/" + sc.total, sc.miss, b + "/" + L.build.length, f, L.fix.length]);
+    });
+    const csv = "﻿" + rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+    a.download = "noun-clause-results-" + room + ".csv"; a.click();
+  }
+
+  function qrSVG(text){ if (typeof qrcode === "undefined") return `<p style="font-size:14px;word-break:break-all;padding:10px">${esc(text)}</p>`; const q = qrcode(0, "M"); q.addData(text); q.make(); return q.createSvgTag({cellSize:6, margin:2, scalable:true}); }
+
+  function bar(){
+    const secs = [];
+    SLIDES.forEach((s, i) => { if (!secs.length || secs[secs.length - 1].name !== s.sec) secs.push({name: s.sec, first: i, act: false}); if (ACT[s.type]) secs[secs.length - 1].act = true; });
+    const cur = SLIDES[S.i].sec;
+    $("#secs").innerHTML = secs.map(x => `<button class="sec${x.name === cur ? " on" : ""}${x.act ? " act" : ""}" data-i="${x.first}">${esc(x.name)}</button>`).join("") + `<span class="pos">${S.i + 1} / ${SLIDES.length}</span>`;
+    $("#secs").querySelectorAll("button").forEach(b => b.onclick = () => go(+b.dataset.i, 0));
+    const sl = SLIDES[S.i];
+    $("#nexthint").textContent = S.b < sl.builds && sl.hint && sl.hint[S.b] ? "next: " + sl.hint[S.b] : "";
+    $("#count").textContent = students().length + " joined";
+  }
+
+  const NOTE_COLORS = ["var(--note-y)","var(--note-p)","var(--note-b)","var(--note-m)"];
+  function mindNotes(withMarks, swipe){
+    const list = students().filter(s => s.mind && !S.hidden.includes(s.sid));
+    if (!list.length) return `<div class="empty">Answers will appear here…</div>`;
+    return list.map((s, i) => {
+      const r = ((s.sid.charCodeAt(s.sid.length - 1) % 7) - 3) * .8;
+      const body = withMarks ? `I think <mark class="${swipe ? "swipe" : ""}" style="animation-delay:${i*90}ms">that ${esc(s.mind)}</mark>` : `${esc(L.mindStarter)} ${esc(s.mind)}`;
+      return `<div class="note" style="background:${NOTE_COLORS[i % 4]};--r:${r}deg${fresh.has(s.sid) ? "" : ";animation:none"}">${body}<span class="who">— ${esc(s.name)}</span><button data-hide="${esc(s.sid)}" aria-label="Hide this answer">✕</button></div>`;
+    }).join("");
+  }
+
+  function render(mode){
+    bar();
+    const sl = SLIDES[S.i], k = sl.type, el = $("#slide"), b = S.b;
+    const keepScroll = mode !== true && $(".wall") ? $(".wall").scrollTop : 0;
+    let h = "";
+    if (k === "mind"){
+      h = `<div class="mind">
+        <div class="chunky joinbox"><div class="qr">${qrSVG(joinURL)}</div><div class="code">Scan to join<b>${room}</b></div></div>
+        <div style="display:flex;flex-direction:column;min-height:0">
+          <p class="kicker">Mind Reader</p>
+          <h2 class="mindq">${esc(L.mindPrompt)}<span>Start with “${esc(L.mindStarter)}…”</span></h2>
+          <div class="wall">${mindNotes(b >= 1, mode === "build")}</div>
+        </div></div>`;
+    } else if (k === "spot"){
+      const list = students(), rev = b >= 1;
+      const counts = {}; CLAUSE_IDS.forEach(c => counts[c] = 0);
+      let found = 0, possible = 0;
+      list.forEach(s => { const set = new Set(s.spot || []); ALL_CHUNKS.forEach((c, i) => { if (c[1] && set.has(i)) { counts[c[1]]++; found++; } }); possible += CLAUSE_IDS.length; });
+      const pct = possible ? Math.round(found / possible * 100) : 0;
+      const paras = L.passage.map(p => "<p>" + p.map(c => c[1] && rev ? `<mark class="${mode === "build" ? "swipe" : ""}">${esc(c[0])}</mark><span class="cnt">${counts[c[1]]}</span>` : esc(c[0])).join(" ") + "</p>").join("");
+      h = `<div class="spot">
+        <div class="chunky paper"><p class="kicker" style="margin:0">Spot the Clause · read on your phone</p><h3>${esc(L.passageTitle)}</h3>${paras}</div>
+        <div class="side">
+          <div class="chunky stat"><div class="n">${pct}%</div><div class="l">of the ${CLAUSE_IDS.length} noun clauses found by the class</div><div class="track"><span style="width:${pct}%"></span></div></div>
+          <div class="chunky stat"><div class="n">${list.filter(s => (s.spot || []).length).length}</div><div class="l">readers highlighting</div></div>
+        </div></div>`;
+    } else if (k === "build"){
+      const tot = {}, mem = {};
+      L.teams.forEach(t => { tot[t.id] = 0; mem[t.id] = 0; });
+      students().forEach(s => { const t = tm(s); mem[t]++; tot[t] += Object.values(s.build || {}).filter(Boolean).length * 10; });
+      const avg = {}; L.teams.forEach(t => avg[t.id] = mem[t.id] ? Math.round(tot[t.id] / mem[t.id]) : 0);
+      const max = L.build.length * 10;
+      const order = L.teams.slice().sort((a, c) => avg[c.id] - avg[a.id]);
+      h = `<p class="kicker">Clause Builder · team game on your phone</p><h2 class="h2">Build the sentence, win points</h2><p class="kicker" style="margin-top:.4em;font-size:clamp(18px,1.6vw,26px)">Score = average points per player, so every team is fair</p>
+        <div class="board">${order.map(t => `<div class="team"><div>${t.icon} ${esc(t.name)}<small>${mem[t.id]} ${mem[t.id] === 1 ? "player" : "players"}</small></div><div class="tbar"><span style="width:${avg[t.id] / max * 100}%;background:${t.color}"></span></div><div class="pts">${avg[t.id]}</div></div>`).join("")}</div>`;
+    } else if (k === "fix"){
+      const list = students(), rev = b >= 1;
+      let right = 0, done = 0;
+      const per = L.fix.map((f, i) => { let r = 0, d = 0; list.forEach(s => { if (s.fix && i in s.fix){ d++; if (s.fix[i]) r++; } }); right += r; done += d; return d ? Math.round(r / d * 100) : null; });
+      const pct = done ? Math.round(right / done * 100) : 0;
+      h = `<p class="kicker">Fix the AI · on your phone</p><h2 class="h2">The robot did its homework. Can you fix it?</h2>
+        <div class="fixgrid"><div>${L.fix.map((f, i) => `<div class="chunky fixrow"><div><div class="w">${ROBOT.replace('width="34" height="34"','width="26" height="26" style="vertical-align:-6px;margin-right:8px"')}<span class="${rev ? "strike" : ""}">${esc(f.wrong)}</span></div>${rev ? `<div class="r">✓ ${esc(f.options[f.answer])}</div>` : ""}</div><div class="pc">${per[i] === null ? "–" : per[i] + "%"}</div></div>`).join("")}</div>
+        <div class="side"><div class="chunky stat"><div class="bigpc">${pct}%</div><div class="l">of fixes are correct across the class</div><div class="track"><span style="width:${pct}%"></span></div></div></div></div>`;
+    } else {
+      h = slideHTML(sl, b, said());
+    }
+    el.className = "slide" + (ACT[k] && k !== "build" && k !== "fix" ? "" : " center");
+    el.innerHTML = h;
+    const wall = $(".wall"); if (wall && keepScroll) wall.scrollTop = keepScroll;
+    if (wall) wall.querySelectorAll("[data-hide]").forEach(x => x.onclick = () => { S.hidden.push(x.dataset.hide); save(); render(false); pushState(); });
+    if (mode !== "build") el.querySelectorAll(".swipe").forEach(m => m.classList.remove("swipe"));
+    fresh = new Set();
+  }
+  render(true); pushState();
+  setInterval(pushState, 15000);
+}
+
+/* =====================================================================
+   STUDENT
+   ===================================================================== */
+function student(room){
+  const root = $("#student"); root.classList.remove("hidden");
+  const key = "nc_student_" + room + location.search;
+  const me = store.get(key, null) || {sid: "s" + Math.random().toString(36).slice(2, 10), name: "", team: "", mind: "", spot: [], build: {}, fix: {}};
+  let state = {i: 0, b: 0, key: "title"};
+  let live = false, netState = "connecting", gotState = false;
+  const save = () => store.set(key, me);
+  setTimeout(() => { if (me.name && !me.revealed) showReveal(); }, 50);
+  const net = Transport(room, (t, m) => {
+    if (t === "state" && m && typeof m.i === "number" && SLIDES[m.i]){
+      const changed = m.i !== state.i || m.b !== state.b || m.said !== state.said;
+      const myTeam = m.teams && m.teams[me.sid];
+      const teamChanged = myTeam && myTeam !== me.team;
+      if (teamChanged){ me.team = myTeam; save(); }
+      state = m; gotState = true; if (changed || teamChanged) render();
+    }
+  }, ok => { live = ok; netState = ok ? "live" : "offline"; const s = $(".status"); if (s) s.textContent = statusText(); if (ok) hello(); });
+  function statusText(){ return ({live:"Connected", connecting:"Connecting…", offline:"No connection. Check your internet and reload."})[netState] + " · room " + room; }
+  function hello(){ net.send("hello", {sid: me.sid}); if (me.name) push(); }
+  function push(){ save(); net.send("s", me); }
+  setTimeout(hello, 300);
+  setInterval(() => { if (me.name) push(); }, 20000);
+
+  function showReveal(){
+    if (document.getElementById("reveal")) return;
+    const ov = document.createElement("div"); ov.id = "reveal"; ov.className = "rolling";
+    ov.innerHTML = `<canvas></canvas><p class="rk">Finding your team…</p><div class="ri"></div><p class="rn"></p><p class="rs"></p><button class="btn hidden">Let's go!</button>`;
+    document.body.appendChild(ov);
+    const rk = ov.querySelector(".rk"), ri = ov.querySelector(".ri"), rn = ov.querySelector(".rn"), rs = ov.querySelector(".rs"), bt = ov.querySelector("button");
+    const start = Date.now(); let k = 0, done = false;
+    const roll = setInterval(() => {
+      const t = L.teams[k++ % L.teams.length];
+      ov.style.backgroundColor = t.color; ri.textContent = t.icon; rn.textContent = t.name;
+      if (me.team && Date.now() - start > 1600) land();
+      if (!me.team && Date.now() - start > 8000) rk.textContent = "Waiting for the teacher's screen…";
+    }, 95);
+    function land(){
+      if (done) return; done = true; clearInterval(roll);
+      const t = teamOf(me.team);
+      ov.className = "landed"; ov.style.backgroundColor = t.color;
+      rk.textContent = "You got"; ri.textContent = t.icon; rn.textContent = t.name;
+      rs.innerHTML = "Find your teammates!<br>ไปหาเพื่อนร่วมทีมเลย";
+      bt.classList.remove("hidden"); bt.focus();
+      confetti(ov.querySelector("canvas"), t.color);
+      const timer = setTimeout(close, 5000);
+      bt.onclick = () => { clearTimeout(timer); close(); };
+    }
+    function close(){ me.revealed = true; save(); ov.classList.add("fade"); setTimeout(() => ov.remove(), 650); render(); }
+  }
+  function confetti(cv, color){
+    if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; const g = cv.getContext("2d"); g.scale(dpr, dpr);
+    const cols = ["#FFE047", "#FFFFFF", "#FFC2DA", "#B9DDFF", "#B5EFD2"];
+    const ps = Array.from({length: 120}, () => ({x: W / 2, y: H * .42, vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, s: 5 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.floor(Math.random() * cols.length)]}));
+    let f = 0;
+    (function tick(){
+      g.clearRect(0, 0, W, H);
+      ps.forEach(p => { p.vy += .38; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); g.restore(); });
+      if (++f < 150) requestAnimationFrame(tick);
+    })();
+  }
+  function header(){
+    if (!me.name) return "";
+    if (!me.team) return `<div class="top"><span class="me">${esc(me.name)} · finding your team…</span></div>`;
+    const t = teamOf(me.team);
+    return `<div class="top"><span class="me"><i style="background:${t.color}"></i>${esc(me.name)} · ${esc(t.name)}</span></div>`;
+  }
+
+  function render(){
+    let h = "";
+    if (!me.name){
+      h = `<div class="chunky panel">
+        <p class="kicker" style="font-size:24px;margin:0">Welcome to class</p>
+        <h2>Noun clauses in the age of AI</h2>
+        <p>Type your nickname. The class will put you in a team. <span class="th">พิมพ์ชื่อเล่น ระบบจะจัดทีมให้อัตโนมัติ</span></p>
+        <label for="nm" class="th">Nickname</label>
+        <input id="nm" class="field" maxlength="16" autocomplete="off" placeholder="Mint" value="">
+<div style="height:16px"></div>
+        <button class="btn go full" id="join">Join class</button>
+        <p class="err" id="err" role="alert"></p></div>`;
+      root.innerHTML = h + `<p class="status">${statusText()}</p>`;
+      const nm = $("#nm");
+      nm.oninput = () => { $("#err").textContent = ""; }; nm.onkeydown = e => { if (e.key === "Enter") $("#join").click(); };
+      $("#join").onclick = () => {
+        const n = nm.value.trim();
+        if (!n){ $("#err").textContent = "Type your nickname first."; nm.focus(); return; }
+        me.name = n; push(); render(); showReveal();
+      };
+      return;
+    }
+    const k = state.key;
+    if (k === "mind"){
+      if (me.mind){
+        h = `<div class="chunky panel"><h2>Sent!</h2><p>Look at the big screen.</p><p class="starter">${state.b >= 1 ? `I think <mark>that ${esc(me.mind)}</mark>` : `${esc(L.mindStarter)} ${esc(me.mind)}`}</p><button class="btn" id="edit">Change my answer</button></div>`;
+        root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+        $("#edit").onclick = () => { me.mind = ""; save(); render(); };
+        return;
+      }
+      h = `<div class="chunky panel"><p class="kicker" style="margin:0">Mind Reader</p><h2>${esc(L.mindPrompt)}</h2>
+        <p>Finish the sentence. <span class="th">พิมพ์ต่อประโยคให้จบ</span></p>
+        <label class="combo" for="mi"><span class="pre">${esc(L.mindStarter)}</span><input id="mi" maxlength="70" autocomplete="off" placeholder="AI is helpful…"></label>
+        <p class="th" style="margin:8px 0 0">ไม่ต้องพิมพ์ "I think that" ซ้ำ พิมพ์แค่ส่วนที่เหลือ</p>
+        <p class="preview" id="pv">${esc(L.mindStarter)} ______.</p>
+        <button class="btn go full" id="send" style="margin-top:12px">Send</button><p class="err" id="err" role="alert"></p></div>`;
+      root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+      const mi = $("#mi"); mi.oninput = () => { $("#err").textContent = ""; const t = mi.value.trim().replace(/^i think( that)?\s*/i, "").replace(/^that\s+/i, ""); $("#pv").textContent = L.mindStarter + " " + (t || "______") + "."; };
+      const send = () => {
+        let v = mi.value.trim().replace(/^i think( that)?\s*/i, "").replace(/^that\s+/i, "");
+        if (v.length < 2){ $("#err").textContent = "Write a few words first."; mi.focus(); return; }
+        me.mind = v; push(); render();
+      };
+      $("#send").onclick = send; mi.onkeydown = e => { if (e.key === "Enter") send(); };
+      return;
+    }
+    if (k === "spot"){
+      const rev = state.b >= 1;
+      const set = new Set(me.spot);
+      let idx = 0;
+      const paras = L.passage.map(p => "<p>" + p.map(c => {
+        const i = idx++;
+        let cls = "chunk";
+        if (rev){ if (c[1] && set.has(i)) cls += " right"; else if (!c[1] && set.has(i)) cls += " wrong"; else if (c[1]) cls += " missed"; }
+        return `<span class="${cls}" role="button" tabindex="${rev ? -1 : 0}" data-i="${i}" aria-pressed="${set.has(i)}">${esc(c[0])}</span>`;
+      }).join(" ") + "</p>").join("");
+      const sc = spotScore(me.spot);
+      h = `<div class="chunky panel"><p class="kicker" style="margin:0">Spot the Clause</p><h2>${esc(L.passageTitle)}</h2>
+        <p>Tap every noun clause to highlight it. <span class="th">แตะส่วนที่เป็น noun clause</span></p>
+        <div class="ptext">${paras}</div></div>
+        <div class="chunky counter"><span>${rev ? `You found ${sc.hit} of ${sc.total}` : `Highlighted: ${me.spot.length}`}</span><span class="hand" style="font-size:22px">${rev ? (sc.miss ? sc.miss + " extra" : "clean!") : `${sc.total} are hiding`}</span></div>`;
+      root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+      if (!rev) root.querySelectorAll(".chunk").forEach(b => {
+        const tog = () => {
+          const i = +b.dataset.i, y = window.scrollY;
+          me.spot = set.has(i) ? me.spot.filter(x => x !== i) : me.spot.concat(i);
+          push(); render(); window.scrollTo(0, y);
+          const f = root.querySelector(`.chunk[data-i="${i}"]`); if (f) f.focus({preventScroll:true});
+        };
+        b.onclick = tog; b.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tog(); } };
+      });
+      return;
+    }
+    if (k === "build" || k === "fix"){
+      const isB = k === "build", items = isB ? L.build : L.fix, ans = isB ? me.build : me.fix;
+      let cur = items.findIndex((_, i) => !(i in ans));
+      const prog = `<div class="prog">${items.map((_, i) => `<span class="${i in ans ? "done" : ""}"></span>`).join("")}</div>`;
+      if (cur === -1){
+        const r = Object.values(ans).filter(Boolean).length;
+        h = `<div class="chunky panel">${prog}<h2>${isB ? "All built!" : "Robot fixed!"}</h2><p>You got <b>${r} of ${items.length}</b> right${isB ? ` and won <b>${r * 10}</b> points for ${me.team ? esc(teamOf(me.team).name) : "your team"}` : ""}.</p><p>Look at the big screen.</p></div>`;
+        root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+        return;
+      }
+      const it = items[cur];
+      const q = isB
+        ? `<p class="q">${esc(it.before)} <span class="blank">?</span> ${esc(it.after)}</p>`
+        : `<div class="robot">${ROBOT}<div><span class="th">The AI wrote:</span><br><b style="font-weight:600">${esc(it.wrong)}</b></div></div><p class="q" style="font-size:19px">Which one is correct?</p>`;
+      h = `<div class="chunky panel">${prog}<p class="kicker" style="margin:0">${isB ? "Clause Builder" : "Fix the AI"} · ${cur + 1} of ${items.length}${it.mainIdea ? " · main idea" : ""}</p>${q}
+        <div class="opts">${it.options.map((o, i) => `<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}</div></div>`;
+      root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+      root.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+        const pick = +b.dataset.i, ok = pick === it.answer;
+        ans[cur] = ok; push();
+        root.querySelectorAll(".opt").forEach(x => { x.disabled = true; const j = +x.dataset.i; if (j === it.answer) x.classList.add("right"); else if (j === pick) x.classList.add("wrong"); });
+        const t = document.createElement("div");
+        t.className = "toast"; t.style.background = ok ? "var(--note-m)" : "#FFD6DA";
+        t.textContent = ok ? (isB ? "Correct! +10 for your team" : "Fixed it!") : "Not this time. The green one is right.";
+        root.querySelector(".panel").after(t);
+        setTimeout(render, ok ? 900 : 1700);
+      });
+      return;
+    }
+    if (state.i === SLIDES.length - 1){
+      const sc = spotScore(me.spot);
+      const b = Object.values(me.build).filter(Boolean).length, f = Object.values(me.fix).filter(Boolean).length;
+      h = `<div class="chunky panel"><h2>Great work, ${esc(me.name)}!</h2><p>Here is how you did today.</p>
+        <div class="score"><div><b>${sc.hit}/${sc.total}</b>clauses found</div><div><b>${b}/${L.build.length}</b>sentences built</div><div><b>${f}/${L.fix.length}</b>AI fixes</div></div></div>`;
+      root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+      return;
+    }
+    const sl = SLIDES[state.i] || SLIDES[0];
+    h = `<div class="chunky panel mirror"><div class="slide">${slideHTML(sl, state.b, {said: state.said || "AI is helpful"})}</div></div><p class="th" style="text-align:center;margin-top:14px">Eyes on the big screen · ดูจอใหญ่ไปพร้อมกัน</p>`;
+    root.innerHTML = header() + h + `<p class="status">${statusText()}</p>`;
+    root.querySelectorAll(".swipe").forEach(m => m.classList.remove("swipe"));
+  }
+  render();
+}
+
+const hash = location.hash.slice(1);
+const m = hash.match(/(?:^|&)r=([A-Z]{4})/i);
+if (m) student(m[1].toUpperCase()); else teacher();
+window.addEventListener("hashchange", () => location.reload());
+})();
+</script>
+</body>
+</html>
